@@ -19,7 +19,6 @@ class MemeEditorViewController: UIViewController {
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     
     enum ImagePickerType: Int { case album = 0, camera }
-    var meme: Meme?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,8 +32,8 @@ class MemeEditorViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        shareButton.isEnabled = meme != nil
-        cancelButton.isEnabled = meme != nil
+        shareButton.isEnabled = imagePickerView.image != nil
+        cancelButton.isEnabled = imagePickerView.image != nil
         cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         subscribeToKeyboardNotifications()
     }
@@ -61,7 +60,7 @@ class MemeEditorViewController: UIViewController {
         let avc = UIActivityViewController(activityItems: activityItem, applicationActivities: nil)
         avc.completionWithItemsHandler = {(activityType: UIActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?) in
             if !completed { return }
-            self.meme = self.saveAsMeme()
+            self.save()
             self.dismiss(animated: true, completion: nil)
         }
         present(avc, animated: true, completion: nil)
@@ -69,7 +68,6 @@ class MemeEditorViewController: UIViewController {
     
     @IBAction func cancel(_ sender: Any) {
         imagePickerView.image = nil
-        meme = nil
         shareButton.isEnabled = false
         cancelButton.isEnabled = false
         topTextField.text = "TOP"
@@ -84,7 +82,6 @@ extension MemeEditorViewController: UIImagePickerControllerDelegate, UINavigatio
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             imagePickerView.image = image
-            meme = saveAsMeme()
             topTextField.isEnabled = true
             bottomTextField.isEnabled = true
         }
@@ -162,9 +159,7 @@ extension MemeEditorViewController {
     }
     
     func generateMemedImage() -> UIImage {
-        navigationController?.setToolbarHidden(true, animated: false)
-        topToolbar.isHidden = true
-        bottomToolbar.isHidden = true
+        configureBars(hidden: true)
         
         // Render view to an image
         UIGraphicsBeginImageContext(self.view.frame.size)
@@ -172,20 +167,23 @@ extension MemeEditorViewController {
         let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
         
-        navigationController?.setToolbarHidden(false, animated: false)
-        topToolbar.isHidden = false
-        bottomToolbar.isHidden = false
+        configureBars(hidden: false)
         
         return memedImage
     }
     
-    func saveAsMeme() -> Meme {
+    func save() {
         let meme = Meme(
             topText: topTextField.text ?? "",
             bottomText: bottomTextField.text ?? "",
             originalImage: imagePickerView.image ?? UIImage(),
             memedImage: generateMemedImage()
         )
-        return meme
+    }
+    
+    private func configureBars(hidden: Bool) {
+        navigationController?.setToolbarHidden(hidden, animated: false)
+        topToolbar.isHidden = hidden
+        bottomToolbar.isHidden = hidden
     }
 }
