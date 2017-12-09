@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class MemeEditorViewController: UIViewController {
     
     @IBOutlet weak var imagePickerView: UIImageView!
     @IBOutlet weak var topTextField: UITextField!
@@ -18,23 +18,15 @@ class ViewController: UIViewController {
     @IBOutlet weak var bottomToolbar: UIToolbar!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     
-    let memeTextAttributes: [String: Any] = [
-        NSAttributedStringKey.strokeColor.rawValue: UIColor.black,
-        NSAttributedStringKey.foregroundColor.rawValue: UIColor.white, //This config doesn't work?
-        NSAttributedStringKey.font.rawValue: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-        NSAttributedStringKey.strokeWidth.rawValue: 5.0
-    ]
-    
+    enum ImagePickerType: Int { case album = 0, camera }
     var meme: Meme?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.bringSubview(toFront: topToolbar)
         view.bringSubview(toFront: bottomToolbar)
-        topTextField.defaultTextAttributes = memeTextAttributes
-        bottomTextField.defaultTextAttributes = memeTextAttributes
-        topTextField.textAlignment = .center
-        bottomTextField.textAlignment = .center
+        customize(textField: topTextField)
+        customize(textField: bottomTextField)
         topTextField.delegate = self
         bottomTextField.delegate = self
     }
@@ -51,18 +43,16 @@ class ViewController: UIViewController {
         unsubscribeFromKeyboardNotifications()
         super.viewWillDisappear(animated)
     }
-
-    @IBAction func pickAnImageFromAlbum(_ sender: Any) {
-        let pickerController = UIImagePickerController()
-        pickerController.delegate = self
-        pickerController.sourceType = .photoLibrary
-        present(pickerController, animated: true, completion: nil)
-    }
     
-    @IBAction func pickAnImageFromCamera(_ sender: Any) {
+    @IBAction func pickImage(_ sender: UIBarButtonItem) {
         let pickerController = UIImagePickerController()
         pickerController.delegate = self
-        pickerController.sourceType = .camera
+        switch(ImagePickerType(rawValue: sender.tag)!) {
+        case .album:
+            pickerController.sourceType = .photoLibrary
+        case .camera:
+            pickerController.sourceType = .camera
+        }
         present(pickerController, animated: true, completion: nil)
     }
     
@@ -90,7 +80,7 @@ class ViewController: UIViewController {
 }
 
 // MARK: ImagePicker
-extension ViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+extension MemeEditorViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             imagePickerView.image = image
@@ -107,7 +97,19 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 }
 
 // MARK: TextField
-extension ViewController: UITextFieldDelegate {
+extension MemeEditorViewController: UITextFieldDelegate {
+    func customize(textField: UITextField) {
+        let memeTextAttributes: [String: Any] = [
+            NSAttributedStringKey.strokeColor.rawValue: UIColor.black,
+            NSAttributedStringKey.foregroundColor.rawValue: UIColor.white,
+            NSAttributedStringKey.font.rawValue: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            NSAttributedStringKey.strokeWidth.rawValue: -5
+        ]
+        
+        textField.defaultTextAttributes = memeTextAttributes
+        textField.textAlignment = .center
+    }
+    
     func textFieldDidBeginEditing(_ textField: UITextField) {
         if textField.text == "TOP" { topTextField.text?.removeAll() }
         if textField.text == "BOTTOM" { bottomTextField.text?.removeAll() }
@@ -120,7 +122,7 @@ extension ViewController: UITextFieldDelegate {
 }
 
 // MARK: Handle keyboard
-extension ViewController {
+extension MemeEditorViewController {
     @objc func keyboardWillShow(_ notification:Notification) {
         if bottomTextField.isFirstResponder {
             view.frame.origin.y = 0 - getKeyboardHeight(notification)
@@ -151,7 +153,7 @@ extension ViewController {
 }
 
 // MARK: Generate Meme
-extension ViewController {
+extension MemeEditorViewController {
     struct Meme {
         var topText: String,
         bottomText: String,
