@@ -124,15 +124,15 @@ extension MemeEditorViewController: UITextFieldDelegate {
 // MARK: Handle keyboard
 extension MemeEditorViewController {
     @objc func keyboardWillShow(_ notification:Notification) {
-        if bottomTextField.isFirstResponder {
+        if topTextField.isFirstResponder {
+            view.frame.origin.y = 0 - topToolbar.frame.height
+        } else if bottomTextField.isFirstResponder {
             view.frame.origin.y = 0 - getKeyboardHeight(notification)
         }
     }
     
     @objc func keyboardWillHide(_ notification:Notification) {
-        if bottomTextField.isFirstResponder {
-            view.frame.origin.y = 0
-        }
+        view.frame.origin.y = 0
     }
     
     func getKeyboardHeight(_ notification:Notification) -> CGFloat {
