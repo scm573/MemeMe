@@ -33,7 +33,6 @@ class MemeEditorViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         shareButton.isEnabled = imagePickerView.image != nil
-        cancelButton.isEnabled = imagePickerView.image != nil
         cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         subscribeToKeyboardNotifications()
     }
@@ -67,13 +66,16 @@ class MemeEditorViewController: UIViewController {
     }
     
     @IBAction func cancel(_ sender: Any) {
-        imagePickerView.image = nil
-        shareButton.isEnabled = false
-        cancelButton.isEnabled = false
-        topTextField.text = "TOP"
-        bottomTextField.text = "BOTTOM"
-        topTextField.isEnabled = false
-        bottomTextField.isEnabled = false
+        if imagePickerView.image == nil {
+            self.dismiss(animated: true, completion: nil)
+        } else {
+            imagePickerView.image = nil
+            shareButton.isEnabled = false
+            topTextField.text = "TOP"
+            bottomTextField.text = "BOTTOM"
+            topTextField.isEnabled = false
+            bottomTextField.isEnabled = false
+        }
     }
 }
 
@@ -151,13 +153,6 @@ extension MemeEditorViewController {
 
 // MARK: Generate Meme
 extension MemeEditorViewController {
-    struct Meme {
-        var topText: String,
-        bottomText: String,
-        originalImage: UIImage,
-        memedImage: UIImage
-    }
-    
     func generateMemedImage() -> UIImage {
         configureBars(hidden: true)
         
@@ -179,6 +174,9 @@ extension MemeEditorViewController {
             originalImage: imagePickerView.image ?? UIImage(),
             memedImage: generateMemedImage()
         )
+        
+        AppDelegate.shared.memes.append(meme)
+        self.dismiss(animated: true, completion: nil)
     }
     
     private func configureBars(hidden: Bool) {
