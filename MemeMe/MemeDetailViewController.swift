@@ -15,10 +15,10 @@ class MemeDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tabBarController?.tabBar.isHidden = true
         
         if let index = index {
             image.image = AppDelegate.shared.memes[index].memedImage
         }
     }
-    
 }

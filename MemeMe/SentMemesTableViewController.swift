@@ -9,16 +9,14 @@ import UIKit
 
 class SentMemesTableViewController: UITableViewController {
     
-    var memes: [Meme]?
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        memes = AppDelegate.shared.memes
+        tabBarController?.tabBar.isHidden = false
         tableView.reloadData()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return memes?.count ?? 0
+        return AppDelegate.shared.memes.count
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -27,11 +25,21 @@ class SentMemesTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "SentMemesTableViewCell") as! SentMemesTableViewCell
-        if let memes = memes {
-            cell.memeImage.image = memes[indexPath.row].memedImage
-            cell.memeLabel.text = memes[indexPath.row].topText + " " + memes[indexPath.row].bottomText
-        }
+        let memes = AppDelegate.shared.memes
+        cell.memeImage.image = memes[indexPath.row].memedImage
+        cell.memeLabel.text = memes[indexPath.row].topText + " " + memes[indexPath.row].bottomText
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == UITableViewCellEditingStyle.delete) {
+            AppDelegate.shared.memes.remove(at: indexPath.row)
+            tableView.reloadData()
+        }
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

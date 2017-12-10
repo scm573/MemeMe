@@ -26,8 +26,6 @@ class MemeEditorViewController: UIViewController {
         view.bringSubview(toFront: bottomToolbar)
         customize(textField: topTextField)
         customize(textField: bottomTextField)
-        topTextField.delegate = self
-        bottomTextField.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -102,11 +100,12 @@ extension MemeEditorViewController: UITextFieldDelegate {
             NSAttributedStringKey.strokeColor.rawValue: UIColor.black,
             NSAttributedStringKey.foregroundColor.rawValue: UIColor.white,
             NSAttributedStringKey.font.rawValue: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-            NSAttributedStringKey.strokeWidth.rawValue: -5
+            NSAttributedStringKey.strokeWidth.rawValue: -3.5
         ]
         
         textField.defaultTextAttributes = memeTextAttributes
         textField.textAlignment = .center
+        textField.delegate = self
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -124,9 +123,9 @@ extension MemeEditorViewController: UITextFieldDelegate {
 extension MemeEditorViewController {
     @objc func keyboardWillShow(_ notification:Notification) {
         if topTextField.isFirstResponder {
-            view.frame.origin.y = 0 - topToolbar.frame.height
+            view.frame.origin.y = -topToolbar.frame.height
         } else if bottomTextField.isFirstResponder {
-            view.frame.origin.y = 0 - getKeyboardHeight(notification)
+            view.frame.origin.y = -getKeyboardHeight(notification)
         }
     }
     

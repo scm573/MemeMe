@@ -11,8 +11,6 @@ class SentMemesCollectionViewController: UICollectionViewController {
     
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     
-    var memes: [Meme]?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -26,19 +24,17 @@ class SentMemesCollectionViewController: UICollectionViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        memes = AppDelegate.shared.memes
+        tabBarController?.tabBar.isHidden = false
         collectionView?.reloadData()
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return memes?.count ?? 0
+        return AppDelegate.shared.memes.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SentMemesCollectionViewCell", for: indexPath) as! SentMemesCollectionViewCell
-        if let memes = memes {
-            cell.memeImage.image = memes[indexPath.row].memedImage
-        }
+        cell.memeImage.image = AppDelegate.shared.memes[indexPath.row].memedImage
         return cell
     }
     
